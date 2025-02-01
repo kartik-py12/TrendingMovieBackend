@@ -1,0 +1,7 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables (DO NOT expose API keys!)
+.env
+.env.local
+
