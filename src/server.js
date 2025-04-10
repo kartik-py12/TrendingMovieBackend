@@ -104,7 +104,7 @@ app.get("/api/movies/:id/recommendations", async (req, res) => {
   await handleTmdbRequest(`/movie/${id}/recommendations`, { page }, res);
 });
 
-// TV Shows routes
+// TV Shows routess
 app.get("/api/tv/popular", async (req, res) => {
   const { page = 1 } = req.query;
   await handleTmdbRequest("/tv/popular", { page }, res);
@@ -180,6 +180,39 @@ app.get("/api/search/multi", async (req, res) => {
     return res.status(400).json({ error: "Query parameter is required" });
   }
   await handleTmdbRequest("/search/multi", { query, page }, res);
+});
+
+// Add specific endpoint for movie search
+app.get("/api/search/movie", async (req, res) => {
+  const { 
+    query, 
+    page = 1, 
+    year = null, 
+    primary_release_year = null,
+    include_adult = false 
+  } = req.query;
+  
+  if (!query) {
+    return res.status(400).json({ error: "Query parameter is required" });
+  }
+  
+  const params = { 
+    query, 
+    page, 
+    include_adult: include_adult === 'true',
+    // Use either year or primary_release_year if provided
+    ...(primary_release_year && { primary_release_year }),
+    ...(year && !primary_release_year && { year })
+  };
+  
+  await handleTmdbRequest("/search/movie", params, res);
+});
+
+// For backwards compatibility with your existing code
+app.get("/api/search/movies", async (req, res) => {
+  // Redirect to the /api/search/movie endpoint
+  const queryParams = new URLSearchParams(req.query).toString();
+  res.redirect(`/api/search/movie?${queryParams}`);
 });
 
 // Start the server
